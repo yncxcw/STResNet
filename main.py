@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
             print("loss: {:.3f}, val_loss: {:.3f}".format(loss_train, loss_val))  
             # save the model after every epoch         
-            g.saver.save(sess, param.model_path+"/current")
+            g.saver.save(sess, param.model_path+"/tmp")
     train_writer.close()
     val_writer.close()
     print("Run 'tensorboard --logdir=./logdir' to checkout tensorboard logs.")
