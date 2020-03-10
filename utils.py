@@ -6,27 +6,43 @@ This file contains helper functions for running the main neural network.
 
 import numpy as np
 
-def batch_generator(X, y, batch_size):
+def get_dataset_indices(data_len, data_type):
+    if data_type == "train":
+        start = 0
+        end = int(data_len * 0.7)
+    else:
+        start = int(data_len * 0.7)
+        end = data_len
+    return np.arange(data_len)[start :end]
+
+def batch_generator(dataloader, batch_size, data_type):
     """
     Batch generator 
     """
-    size = X.shape[0]
-    X_copy = X.copy()
-    y_copy = y.copy()
-    indices = np.arange(size)
+    data_len = len(dataloader)
+    indices = get_dataset_indices(data_len, data_type)
     np.random.shuffle(indices)
-    X_copy = X_copy[indices]
-    y_copy = y_copy[indices]
-    i = 0
+    start = 0;
+    end = len(indices)
+
     while True:
-        if i + batch_size <= size:
-            yield X_copy[i:i + batch_size], y_copy[i:i + batch_size]
-            i += batch_size
+        if start + batch_size < end:
+            closeness_list = []
+            period_list = []
+            trend_list = []
+            predict_list = []
+            for j in range(batch_size):
+                index = indices[start + j]
+                closeness, period, trend, predict = dataloader[index]
+                closeness_list.append(closeness)
+                period_list.append(period)
+                trend_list.append(trend)
+                predict_list.append(predict)
+            yield np.stack(closeness_list), np.stack(period_list), np.stack(trend_list), np.stack(predict_list)
+            start += batch_size 
         else:
-            i = 0
-            indices = np.arange(size)
+            start = 0
+            end = len(indices)
             np.random.shuffle(indices)
-            X_copy = X_copy[indices]
-            y_copy = y_copy[indices]
             continue
 

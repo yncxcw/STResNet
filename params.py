@@ -11,7 +11,7 @@ class Params(object):
     closeness_sequence_length = 3
     period_sequence_length = 3
     trend_sequence_length =  3
-    nb_flow = 2
+    nb_flow = 1
     num_of_filters = 64
     num_of_residual_units = 12
     num_of_output = 1 #depth of predicted output map
@@ -20,5 +20,6 @@ class Params(object):
     beta1 = 0.8
     beta2 = 0.999
     lr = 0.001
-    num_epochs = 10
+    num_epochs = 50
     logdir = "train"
+    data_path = "data.csv"

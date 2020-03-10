@@ -87,8 +87,11 @@ def Fusion(closeness_output, period_output, trend_output, scope, shape):
         output = tf.reshape(trend_output, [trend_output.shape[0]*trend_output.shape[1], trend_output.shape[2]])
         output = tf.matmul(output, Wt)
         trend_output = tf.reshape(output, [trend_output.shape[0], trend_output.shape[1], trend_output.shape[2]])
-        # fusion
-        outputs = tf.add(tf.add(closeness_output, period_output), trend_output)        
+        # weighted fusion
+        # weight for closeness = 2^2/(2^2+2^1+2^0)
+        # weight for period = 2^1 / (2^2+2^1+2^0)
+        # weight for trend = 2^0 / (2^2+2^1+2^0)
+        outputs = tf.add(tf.add(closeness_output * 4.0 / 7.0, period_output * 2.0 / 7.0), trend_output * 1.0 / 7.0)        
         # adding non-linearity
         outputs = tf.tanh(outputs)        
         # converting the dimension from (B, H, W) -> (B, H, W, 1) to match ground truth labels

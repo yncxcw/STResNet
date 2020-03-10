@@ -6,13 +6,13 @@ import numpy as np
 
 class STRdataloader():
 
-    def __init__(self, path, param):
+    def __init__(self):
         """
         Args:
             path (str): string path to a csv file.
             param (Params): params for configuring training.
         """
-        self.csv_reader = csv.DictReader(open(path, "r")) 
+        self.csv_reader = csv.DictReader(open(param.data_path, "r")) 
         # Each frame presenets the accidental statistic of a single day
         # Embeded in a 2D     
         self.frames = []
@@ -55,7 +55,7 @@ class STRdataloader():
         self.grid_width = (self.x_max - self.x_min + 0.0000001) / self.width
         self.grid_height = (self.y_max - self.y_min + 0.0000001) / self.height
         # Step 2: parse the csv file to conver it into grids
-        self.csv_reader = csv.DictReader(open(path, "r"))
+        self.csv_reader = csv.DictReader(open(param.data_path, "r"))
         for row in self.csv_reader:
             date = self.row_to_datetime(row)
             date_index = (date - self.date_min).days
@@ -85,8 +85,10 @@ class STRdataloader():
         else:
             return self.frames[index]
 
+    def __len__(self):
+        return len(self.frames)
 
-    def get_data(self, index):
+    def __getitem__(self, index):
         """
         Return the samples and lables at index.
 
@@ -100,23 +102,18 @@ class STRdataloader():
         # by days
         closeness = [self.get_frame(index - i) for i in range(param.closeness_sequence_length)]
         closeness = np.array(closeness)
-
+        closeness = np.transpose(closeness, [1, 2, 0])
         # by weeks
         period = [self.get_frame(index - i * 7) for i in range(param.period_sequence_length)]
         period = np.array(period)
+        period = np.transpose(period, [1, 2, 0])
 
         # by month
         trend = [self.get_frame(index - i * 30) for i in range(param.trend_sequence_length)]
         trend = np.array(trend)
+        trend = np.transpose(trend, [1, 2, 0])
 
         # prediction
         predict = np.array(self.get_frame(index + 1))
-        print(np.sum(closeness))
-        print(np.sum(predict))
-        return closeness, period, predict
-
-
- 
-if __name__ == "__main__":
-    loader = STRdataloader("data.csv", param)
-    loader.get_data(1000)
+        predict = np.expand_dims(predict, axis=2)
+        return closeness, period, trend, predict
