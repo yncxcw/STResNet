@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # build dataloader
     dataloader = STRdataloader()
     # build the computation graph
-    g = Graph(dataloader.min_v, dataloader.max_v)
+    g = Graph()
     print ("Computation graph for ST-ResNet loaded\n")
     # create summary writers for logging train and test statistics
     train_writer = tf.summary.FileWriter('./logdir/train', g.loss.graph)
@@ -50,13 +50,17 @@ if __name__ == '__main__':
             # testing
             for b in tqdm(range(num_test_batch)):
                 x_closeness, x_period, x_trend, y_batch = next(test_batch_generator)                
-                loss_v, summary = sess.run([g.loss, g.merged],
+                loss_v, output, summary = sess.run([g.loss, g.output, g.merged],
                                             feed_dict={g.c_inp: x_closeness,
                                                        g.p_inp: x_period,
                                                        g.t_inp: x_trend,
                                                        g.output: y_batch})
                 loss_val += loss_v
                 val_writer.add_summary(summary, b + num_test_batch * epoch)
+                
+                # prediction output [batch_size, H, W, 1] 
+                denormalized_output = dataloader.inverse_transform(output)
+
             if num_test_batch != 0:
                 loss_val /= num_test_batch
 

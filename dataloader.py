@@ -96,7 +96,23 @@ class STRdataloader():
 
     def __len__(self):
         return len(self.frames)
-    
+
+    def transform(self, X):
+        """
+        Normalize a tensory.
+        """
+        X = 1. * (X - self.min_v) / (self.max_v - self.min_v) 
+        X = X * 2 - 1.
+        return X
+
+    def inverse_transform(self, X):
+        """
+        Denormalize a numpy.
+        """
+        X = (X + 1.) / 2.
+        X = 1. * X * (self.max_v - self.min_v) + self.min_v
+        return X
+
     def __getitem__(self, index):
         """
         Return the samples and lables at index.
@@ -110,20 +126,20 @@ class STRdataloader():
         """
         # by days
         closeness = [self.get_frame(index - i) for i in range(param.closeness_sequence_length)]
-        closeness = np.array(closeness)
+        closeness = self.transform(np.array(closeness))
         closeness = np.transpose(closeness, [1, 2, 0])
 
         # by weeks
         period = [self.get_frame(index - i * 7) for i in range(param.period_sequence_length)]
-        period = np.array(period)
+        period = self.transform(np.array(period))
         period = np.transpose(period, [1, 2, 0])
 
         # by month
         trend = [self.get_frame(index - i * 30) for i in range(param.trend_sequence_length)]
-        trend = np.array(trend)
+        trend = self.transform(np.array(trend))
         trend = np.transpose(trend, [1, 2, 0])
 
         # prediction
-        predict = np.array(self.get_frame(index + 1))
+        predict = self.transform(np.array(self.get_frame(index + 1)))
         predict = np.expand_dims(predict, axis=2)
         return closeness, period, trend, predict
