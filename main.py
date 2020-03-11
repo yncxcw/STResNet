@@ -14,16 +14,15 @@ import h5py
 from dataloader import  STRdataloader
 
 if __name__ == '__main__': 
+    # build dataloader
+    dataloader = STRdataloader()
     # build the computation graph
-    g = Graph()
+    g = Graph(dataloader.min_v, dataloader.max_v)
     print ("Computation graph for ST-ResNet loaded\n")
     # create summary writers for logging train and test statistics
     train_writer = tf.summary.FileWriter('./logdir/train', g.loss.graph)
     val_writer = tf.summary.FileWriter('./logdir/val', g.loss.graph)   
-   
-    # build dataloader
-    dataloader = STRdataloader()
-     
+        
     train_batch_generator = batch_generator(dataloader, param.batch_size, "train")
     test_batch_generator = batch_generator(dataloader, param.batch_size, "test")
 

@@ -52,7 +52,7 @@ class STRdataloader():
 
         self.num_days = (self.date_max - self.date_min).days + 1
         self.frames = [[[0 for i in range(self.width)] for j in range (self.height)] for k in range(self.num_days)]
-        self.grid_width = (self.x_max - self.x_min + 0.0000001) / self.width
+        self.grid_width  = (self.x_max - self.x_min + 0.0000001) / self.width
         self.grid_height = (self.y_max - self.y_min + 0.0000001) / self.height
         # Step 2: parse the csv file to conver it into grids
         self.csv_reader = csv.DictReader(open(param.data_path, "r"))
@@ -67,7 +67,16 @@ class STRdataloader():
             x_index = int((x - self.x_min) / self.grid_width)
             y_index = int((y - self.y_min) / self.grid_height)
             self.frames[date_index][x_index][self.width -1 -y_index] = self.frames[date_index][x_index][self.width -1 -y_index] + 1
- 
+
+        # Step 3: compute max and min for normalization. 
+        self.max_v = float('-inf')
+        self.min_v = float('inf')
+        for frame in self.frames:
+            self.max_v = max(max([max(line) for line in frame]), self.max_v)
+            self.min_v = min(min([min(line) for line in frame]), self.min_v)     
+        print("max: ", self.max_v)
+        print("min: ", self.min_v)
+        
     def row_to_datetime(self, row):
         return datetime.strptime(row["CRASH_DATE"].split("T")[0], "%Y-%m-%d")
 
@@ -87,7 +96,7 @@ class STRdataloader():
 
     def __len__(self):
         return len(self.frames)
-
+    
     def __getitem__(self, index):
         """
         Return the samples and lables at index.
@@ -103,6 +112,7 @@ class STRdataloader():
         closeness = [self.get_frame(index - i) for i in range(param.closeness_sequence_length)]
         closeness = np.array(closeness)
         closeness = np.transpose(closeness, [1, 2, 0])
+
         # by weeks
         period = [self.get_frame(index - i * 7) for i in range(param.period_sequence_length)]
         period = np.array(period)
