@@ -30,6 +30,7 @@ if __name__ == '__main__':
     num_test_batch = int(0.3 * len(dataloader)) // param.batch_size
 
     print("Start learning:")
+    epoch_output = []
     with tf.Session(graph=g.graph) as sess:
         sess.run(tf.global_variables_initializer())        
         for epoch in range(param.num_epochs):            
@@ -48,6 +49,7 @@ if __name__ == '__main__':
                 train_writer.add_summary(summary, b + num_train_batch * epoch)
 
             # testing
+            batch_output = []
             for b in tqdm(range(num_test_batch)):
                 x_closeness, x_period, x_trend, y_batch = next(test_batch_generator)                
                 loss_v, output, summary = sess.run([g.loss, g.output, g.merged],
@@ -60,13 +62,19 @@ if __name__ == '__main__':
                 
                 # prediction output [batch_size, H, W, 1] 
                 denormalized_output = dataloader.inverse_transform(output)
+                batch_output.append(denormalized_output)
 
+            batch_output = np.stack(batch_output, axis=0)
             if num_test_batch != 0:
                 loss_val /= num_test_batch
 
             print("loss: {:.3f}, val_loss: {:.3f}".format(loss_train, loss_val))  
             # save the model after every epoch         
             g.saver.save(sess, "/tmp/model")
+            epoch_output.append(batch_output)
+
+    epoch_output = np.stack(epoch_output, axis=0)
+    np.save("outputs", epoch_output)
     train_writer.close()
     val_writer.close()
     print("Run 'tensorboard --logdir=./logdir' to checkout tensorboard logs.")
