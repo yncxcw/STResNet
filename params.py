@@ -6,8 +6,8 @@ This file contains class Params for hyperparameter declarations.
 
 class Params(object):
     batch_size = 32
-    map_height = 32
-    map_width = 32
+    map_height = 16
+    map_width = 16
     closeness_sequence_length = 3
     period_sequence_length = 3
     trend_sequence_length =  3
@@ -22,4 +22,4 @@ class Params(object):
     lr = 0.001
     num_epochs = 50
     logdir = "train"
-    data_path = "data.csv"
+    data_path = "nova.csv"

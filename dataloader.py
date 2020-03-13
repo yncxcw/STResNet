@@ -101,15 +101,13 @@ class STRdataloader():
         """
         Normalize a tensory.
         """
-        X = 1. * (X - self.min_v) / (self.max_v - self.min_v) 
-        X = X * 2 - 1.
+        X = 1. * (X - self.min_v) / (self.max_v - self.min_v)
         return X
 
     def inverse_transform(self, X):
         """
         Denormalize a numpy.
         """
-        X = (X + 1.) / 2.
         X = 1. * X * (self.max_v - self.min_v) + self.min_v
         return X
 
@@ -126,20 +124,20 @@ class STRdataloader():
         """
         # by days
         closeness = [self.get_frame(index - i) for i in range(param.closeness_sequence_length)]
-        closeness = self.transform(np.array(closeness))
+        closeness = np.array(closeness, np.float32)
+        closeness = self.transform(closeness)
         closeness = np.transpose(closeness, [1, 2, 0])
-
         # by weeks
         period = [self.get_frame(index - i * 7) for i in range(param.period_sequence_length)]
-        period = self.transform(np.array(period))
+        period = self.transform(np.array(period, np.float32))
         period = np.transpose(period, [1, 2, 0])
 
         # by month
         trend = [self.get_frame(index - i * 30) for i in range(param.trend_sequence_length)]
-        trend = self.transform(np.array(trend))
+        trend = self.transform(np.array(trend, np.float32))
         trend = np.transpose(trend, [1, 2, 0])
 
         # prediction
-        predict = self.transform(np.array(self.get_frame(index + 1)))
+        predict = self.transform(np.array(self.get_frame(index + 1), np.float32))
         predict = np.expand_dims(predict, axis=2)
         return closeness, period, trend, predict

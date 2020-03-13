@@ -93,7 +93,8 @@ def Fusion(closeness_output, period_output, trend_output, scope, shape):
         # weight for trend = 2^0 / (2^2+2^1+2^0)
         outputs = tf.add(tf.add(closeness_output * 4.0 / 7.0, period_output * 2.0 / 7.0), trend_output * 1.0 / 7.0)        
         # adding non-linearity
-        outputs = tf.tanh(outputs)        
+        # outputs = tf.tanh(outputs) 
+        outputs = tf.nn.softmax(outputs)           
         # converting the dimension from (B, H, W) -> (B, H, W, 1) to match ground truth labels
         outputs = tf.expand_dims(outputs, axis=3)
         return outputs               
