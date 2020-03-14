@@ -21,7 +21,6 @@ def batch_generator(dataloader, batch_size, data_type):
     """
     data_len = len(dataloader)
     indices = get_dataset_indices(data_len, data_type)
-    np.random.shuffle(indices)
     start = 0;
     end = len(indices)
 
@@ -43,6 +42,4 @@ def batch_generator(dataloader, batch_size, data_type):
         else:
             start = 0
             end = len(indices)
-            np.random.shuffle(indices)
             continue
-
